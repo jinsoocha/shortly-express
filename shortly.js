@@ -10,6 +10,8 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
+var session = require('express-session');
+
 
 var app = express();
 
@@ -21,12 +23,34 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(session({
+  secret: 'haha',
+  resave: false,
+  saveUninitialized: true,
+}));
+// app.use(session());
 
+function restrict(req, res, next) {
+  if (req.session.user) {
+    next();
+  } else {
+    req.session.error = 'Access denied';
 
-app.get('/', 
+    // http://localhost:4568/login
+    res.redirect('/login');
+  }
+}
+
+app.get('/login', function(req, res) {
+  res.render('login');
+});
+
+// http://localhost:4568/
+app.get('/', restrict,
 function(req, res) {
   res.render('index');
 });
+
 
 app.get('/create', 
 function(req, res) {
@@ -75,7 +99,6 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
-
 
 
 /************************************************************/
