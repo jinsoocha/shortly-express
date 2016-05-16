@@ -41,6 +41,10 @@ function restrict(req, res, next) {
   }
 }
 
+app.get('/signup', function(req, res) {
+  res.render('signup');
+});
+
 app.get('/login', function(req, res) {
   res.render('login');
 });
@@ -56,6 +60,8 @@ app.get('/create', restrict,
 function(req, res) {
   res.render('index');
 });
+
+
 
 app.get('/links', restrict,
 function(req, res) {
@@ -94,6 +100,27 @@ function(req, res) {
       });
     }
   });
+});
+
+app.post('/signup', function(req, res) {
+  new User({ username: req.body.username, password: req.body.password })
+    .fetch()
+    .then(function(found) {
+      if (found) {
+        // user already exists
+        console.log('Signup username already exists.');
+        res.sendStatus(404);
+      } else {
+        Users.create({
+          username: req.body.username,
+          password: req.body.password
+        })
+        .then(function() {
+          req.session.user = req.body.username;
+          res.redirect('/');
+        });
+      }
+    });
 });
 
 /************************************************************/
