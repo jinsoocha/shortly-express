@@ -103,7 +103,7 @@ function(req, res) {
 });
 
 app.post('/signup', function(req, res) {
-  new User({ username: req.body.username, password: req.body.password })
+  new User({ username: req.body.username })
     .fetch()
     .then(function(found) {
       if (found) {
@@ -119,6 +119,20 @@ app.post('/signup', function(req, res) {
           req.session.user = req.body.username;
           res.redirect('/');
         });
+      }
+    });
+});
+
+app.post('/login', function(req, res) {
+  new User({ username: req.body.username, password: req.body.password })
+    .fetch()
+    .then(function(found) {
+      if (found) {
+        req.session.user = req.body.username;
+        res.redirect('/');
+      } else {
+        console.log('Username does not exist or password does not match.')
+        res.redirect('/login');
       }
     });
 });
