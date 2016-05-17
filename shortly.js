@@ -123,7 +123,8 @@ app.post('/signup', function(req, res) {
           username: req.body.username,
           password: req.body.password
         })
-        .then(function() {
+        .then(function(found) {
+          console.log(found)
           req.session.user = req.body.username;
           res.redirect('/');
         });
@@ -135,6 +136,7 @@ app.post('/login', function(req, res) {
   new User({ username: req.body.username, password: req.body.password })
     .fetch()
     .then(function(found) {
+      console.log(found)
       if (found) {
         req.session.user = req.body.username;
         res.redirect('/');
