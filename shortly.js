@@ -74,14 +74,19 @@ function(req, res) {
 app.get('/links', restrict,
 function(req, res) {
   Links.reset().fetch().then(function(links) {
-    res.status(200).send(links.models);
+    var newarr = [];
+    links.models.forEach(function(model) {
+      if (model.attributes.username === req.session.user) {
+        newarr.push(model);      
+      }
+    });
+    res.status(200).send(newarr);
   });
 });
 
 app.post('/links', 
 function(req, res) {
   var uri = req.body.url;
-
   if (!util.isValidUrl(uri)) {
     console.log('Not a valid url: ', uri);
     return res.sendStatus(404);
@@ -100,7 +105,8 @@ function(req, res) {
         Links.create({
           url: uri,
           title: title,
-          baseUrl: req.headers.origin
+          baseUrl: req.headers.origin,
+          username: req.session.user
         })
         .then(function(newLink) {
           res.status(200).send(newLink);
