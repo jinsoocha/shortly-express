@@ -11,6 +11,8 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 var session = require('express-session');
+var utility = require('./lib/utility');
+
 
 
 var app = express();
@@ -28,7 +30,6 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
 }));
-// app.use(session());
 
 function restrict(req, res, next) {
   if (req.session.user) {
@@ -50,7 +51,6 @@ app.get('/login', function(req, res) {
 });
 
 app.get('/logout', function(req, res) {
-  console.log("server destroying the session")
   req.session.destroy(function(err) {
     // console.log("err",err);
     res.redirect('/login');
@@ -121,10 +121,10 @@ app.post('/signup', function(req, res) {
       } else {
         Users.create({
           username: req.body.username,
-          password: req.body.password
+          password: req.body.password,
+          salt: utility.salting()
         })
         .then(function(found) {
-          console.log(found)
           req.session.user = req.body.username;
           res.redirect('/');
         });
@@ -133,18 +133,29 @@ app.post('/signup', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
-  new User({ username: req.body.username, password: req.body.password })
+  new User({ username: req.body.username })
     .fetch()
     .then(function(found) {
-      console.log(found)
       if (found) {
-        req.session.user = req.body.username;
-        res.redirect('/');
-      } else {
-        console.log('Username does not exist or password does not match.');
-        res.redirect('/login');
+        if (found.attributes.password === utility.hashing(req.body.password + found.attributes.salt)) {
+          req.session.user = req.body.username;
+          res.redirect('/');
+        } else {
+          console.log('Username does not exist or password does not match.');
+          res.redirect('/login');
+        }
       }
     });
+    // .fetch()
+    // .then(function(found) {
+    //   if (found) {
+    //     req.session.user = req.body.username;
+    //     res.redirect('/');
+    //   } else {
+    //     console.log('Username does not exist or password does not match.');
+    //     res.redirect('/login');
+    //   }
+    // });
 });
 
 /************************************************************/
