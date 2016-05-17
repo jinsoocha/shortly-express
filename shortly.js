@@ -49,6 +49,14 @@ app.get('/login', function(req, res) {
   res.render('login');
 });
 
+app.get('/logout', function(req, res) {
+  console.log("server destroying the session")
+  req.session.destroy(function(err) {
+    // console.log("err",err);
+    res.redirect('/login');
+  });
+});
+
 // http://localhost:4568/
 app.get('/', restrict,
 function(req, res) {
@@ -109,7 +117,7 @@ app.post('/signup', function(req, res) {
       if (found) {
         // user already exists
         console.log('Signup username already exists.');
-        res.sendStatus(404);
+        res.redirect('/signup');
       } else {
         Users.create({
           username: req.body.username,
@@ -131,7 +139,7 @@ app.post('/login', function(req, res) {
         req.session.user = req.body.username;
         res.redirect('/');
       } else {
-        console.log('Username does not exist or password does not match.')
+        console.log('Username does not exist or password does not match.');
         res.redirect('/login');
       }
     });
