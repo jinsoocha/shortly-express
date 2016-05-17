@@ -92,7 +92,7 @@ function(req, res) {
     return res.sendStatus(404);
   }
 
-  new Link({ url: uri }).fetch().then(function(found) {
+  new Link({ url: uri, username: req.session.user}).fetch().then(function(found) {
     if (found) {
       res.status(200).send(found.attributes);
     } else {
@@ -101,6 +101,7 @@ function(req, res) {
           console.log('Error reading URL heading: ', err);
           return res.sendStatus(404);
         }
+
 
         Links.create({
           url: uri,
@@ -152,16 +153,6 @@ app.post('/login', function(req, res) {
         }
       }
     });
-    // .fetch()
-    // .then(function(found) {
-    //   if (found) {
-    //     req.session.user = req.body.username;
-    //     res.redirect('/');
-    //   } else {
-    //     console.log('Username does not exist or password does not match.');
-    //     res.redirect('/login');
-    //   }
-    // });
 });
 
 /************************************************************/
